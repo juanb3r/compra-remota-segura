@@ -1,19 +1,18 @@
-# Safe Remote Purchase
-# Originally from
-# https://github.com/ethereum/solidity/blob/develop/docs/solidity-by-example.rst
-# Ported to vyper and optimized.
+# Correr la transacción:
+# 1. El vendedor ofrece un articulo a la venta y deposita el 2 veces su valor.
+#    Balance es 2x valor.
+#    (1.1. El vendedor puede reclamar su deposito y cerrar la venta si no han
+#    comprado aún el articulo.)
+# 2. El comprador paga el articulo a su valor establecido pero adicionalmente debe
+#    dejar un deposito seguro igual al valor del articulo.
+#    Balance es 4x valor.
+# 3. El vendedor envía el articulo.
+# 4. El comprador confirma recepción del articulo. El deposito se le regresa.
+#    1x valor.
+#    El deposito (2x valor) + valor del articulo (1x valor) es regresado al vendedor.
+#    Balance is 0.
 
-# Rundown of the transaction:
-# 1. Seller posts item for sale and posts safety deposit of double the item value.
-#    Balance is 2*value.
-#    (1.1. Seller can reclaim deposit and close the sale as long as nothing was purchased.)
-# 2. Buyer purchases item (value) plus posts an additional safety deposit (Item value).
-#    Balance is 4*value.
-# 3. Seller ships item.
-# 4. Buyer confirms receiving the item. Buyer's deposit (value) is returned.
-#    Seller's deposit (2*value) + items value is returned. Balance is 0.
-
-value: public(uint256) #Value of the item
+value: public(uint256) # Valor del articulo
 seller: public(address)
 buyer: public(address)
 unlocked: public(bool)
@@ -23,39 +22,39 @@ ended: public(bool)
 @payable
 def __init__():
     assert (msg.value % 2) == 0
-    self.value = msg.value / 2  # The seller initializes the contract by
-        # posting a safety deposit of 2*value of the item up for sale.
+    self.value = msg.value / 2  # El vendedor inicializa el contrato
+        # Realiza un deposito seguro de dos veces el valor del articulo.
     self.seller = msg.sender
     self.unlocked = True
 
 @external
 def abort():
-    assert self.unlocked #Is the contract still refundable?
-    assert msg.sender == self.seller # Only the seller can refund
-        # his deposit before any buyer purchases the item.
-    selfdestruct(self.seller) # Refunds the seller and deletes the contract.
+    assert self.unlocked # Es el contrato aún reembolsable?
+    assert msg.sender == self.seller # Solo el vendedor puede retornar
+        # su deposito antes de que alguien compre el articulo.
+    selfdestruct(self.seller) # Devuelve al vendedor y cancela el contrato.
 
 @external
 @payable
 def purchase():
-    assert self.unlocked    # Is the contract still open (is the item still up
-                            # for sale)?
-    assert msg.value == (2 * self.value) # Is the deposit the correct value?
+    assert self.unlocked    # Está aún abierto el contrato (Aún se encuentra
+                            # el articulo a la venta?
+    assert msg.value == (2 * self.value) # Es el valor correcto el de la compra?
     self.buyer = msg.sender
     self.unlocked = False
 
 @external
 def received():
-    # 1. Conditions
-    assert not self.unlocked    # Is the item already purchased and pending
-                                # confirmation from the buyer?
+    # 1. Condiciones
+    assert not self.unlocked    # Fue el articulo comprado y está pendiente
+                                # de confirmación por parte del comprador?
     assert msg.sender == self.buyer
     assert not self.ended
 
-    # 2. Effects
+    # 2. Efectos
     self.ended = True
 
-    # 3. Interaction
-    send(self.buyer, self.value) # Return the buyer's deposit (=value) to the buyer.
-    selfdestruct(self.seller)   # Return the seller's deposit (=2*value) and the
-                                # purchase price (=value) to the seller.
+    # 3. Interacción
+    send(self.buyer, self.value) # Devuelve el deposito al comprador (=value).
+    selfdestruct(self.seller)   # Regresa al vendedor su deposito (=2*value) y
+                                # el valor del articulo (=value).
