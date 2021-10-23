@@ -12,9 +12,11 @@ Antes que todo debemos tener instalado python dentro de nuestro equipo.
 -   Activación del entorno de desarrollo
 
     Ubuntu/MacOs:
+
     `$ . venv/bin/activate`
 
     Windows:
+
     `$ venv/scripts/activate`
 
 -   Instalación de dependencias
@@ -25,4 +27,5 @@ Antes que todo debemos tener instalado python dentro de nuestro equipo.
 
     Instalamos dependencias y/o librerías
 
-    ```$ pip install 'web3[tester]' $ pip install ipython```
+    ```$ pip install 'web3[tester]' 
+    $ pip install ipython```
