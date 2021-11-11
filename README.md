@@ -53,8 +53,8 @@ Con la ayuda de la librería vyper, podemos compilar nuestros contratos haciendo
     Dentro de nuestra consola usamos los siguiente comandos:
     
     ```
-    $ vyper safe-remote-purchase.by > bytecode.bin
-    $ vyper -f abi safe-remote-purchase.by > abi.json
+    $ vyper safe-remote-purchase.vy > bytecode.bin
+    $ vyper -f abi safe-remote-purchase.vy > abi.json
     ```
     
 Con esos comandos sea crean el bytecode y el ABI
